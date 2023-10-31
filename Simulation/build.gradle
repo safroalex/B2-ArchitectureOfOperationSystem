@@ -23,7 +23,7 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-  mainClass = 'com.safroalex.simulation.root.App'
+  mainClass = 'com.safroalex.root.App'
 }
 
 javafx {
@@ -32,8 +32,6 @@ javafx {
 }
 
 dependencies {
-
-
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }

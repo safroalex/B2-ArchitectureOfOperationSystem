@@ -1,4 +1,4 @@
-package com.safroalex.simulation.ui;
+package com.safroalex.ui;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Label;

@@ -1,8 +1,8 @@
-package com.safroalex.simulation.root;
+package com.safroalex.root;
 
+import com.safroalex.ui.MainWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import com.safroalex.simulation.ui.MainWindow;
 
 public class App extends Application {
     @Override
