@@ -23,7 +23,7 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-  mainClass = 'com.safroalex.simulation.App'
+  mainClass = 'com.safroalex.simulation.root.App'
 }
 
 javafx {
