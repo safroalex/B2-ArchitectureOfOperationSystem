@@ -7,12 +7,13 @@ public class SystemSimulation {
 
     private List<Source> sources;
     private List<Device> devices;
+    private Buffer buffer;
     private double currentModelTime;
 
-    // Конструктор
-    public SystemSimulation(int totalSources, int totalDevices, double minInterval, double maxInterval) {
+    public SystemSimulation(int totalSources, int totalDevices, double minInterval, double maxInterval, int bufferCapacity) {
         this.sources = new ArrayList<>();
         this.devices = new ArrayList<>();
+        this.buffer = new Buffer(bufferCapacity);
         this.currentModelTime = 0;
 
         for (int i = 0; i < totalSources; i++) {
@@ -24,12 +25,6 @@ public class SystemSimulation {
         }
     }
 
-    // Получение текущего количества источников
-    public int getSourceCount() {
-        return sources.size();
-    }
-
-    // Поиск свободного прибора по кольцевой структуре.
     private Device findFreeDevice() {
         for (Device device : devices) {
             if (!device.isBusy()) {
@@ -39,7 +34,6 @@ public class SystemSimulation {
         return null;
     }
 
-    // Шаг моделирования
     public void step() {
         currentModelTime += 1;
         System.out.println("Текущее время модели: " + currentModelTime);
@@ -47,6 +41,13 @@ public class SystemSimulation {
         for (Device device : devices) {
             if (device.isBusy() && currentModelTime >= device.getTimeWhenWillBeFree()) {
                 device.finishProcessing(currentModelTime, sources);
+
+                // Обработка заявок из буфера, если прибор свободен и в буфере есть заявки.
+                Request bufferedRequest = buffer.getRequest();
+                if (bufferedRequest != null) {
+                    device.takeRequest(bufferedRequest, currentModelTime);
+                    System.out.println("Заявка из буфера обработана прибором: " + device);
+                }
             }
         }
 
@@ -59,14 +60,19 @@ public class SystemSimulation {
         }
     }
 
-    // Обработка заявки
     private void processRequest(Request request) {
         Device freeDevice = findFreeDevice();
         if (freeDevice != null) {
             freeDevice.takeRequest(request, currentModelTime);
-            System.out.println("Заявка обработана прибором: " + freeDevice); // Нужно реализовать метод `toString()` для Device
+            System.out.println("Заявка обработана прибором: " + freeDevice);
         } else {
-            // TODO: Реализовать логику для заявок, которые не могут быть обработаны из-за отсутствия свободных приборов
+            // Если все приборы заняты, попытка добавить заявку в буфер.
+            boolean addedToBuffer = buffer.addToBuffer_D1OZ2(request);
+            if (addedToBuffer) {
+                System.out.println("Заявка добавлена в буфер: " + request);
+            } else {
+                System.out.println("Заявка отклонена: " + request);
+            }
         }
     }
 }
