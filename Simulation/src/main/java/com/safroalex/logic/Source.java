@@ -17,6 +17,15 @@ public class Source {
         this.maxInterval = maxInterval;
     }
 
+    @Override
+    public String toString() {
+        return "Source{" +
+                "sourceId=" + sourceId +
+                ", totalGeneratedRequests=" + totalGeneratedRequests +
+                ", averageServiceTime=" + getAverageServiceTime() +
+                '}';
+    }
+
     // Генерирует следующую заявку
     public Request generateRequest() {
         totalGeneratedRequests++;

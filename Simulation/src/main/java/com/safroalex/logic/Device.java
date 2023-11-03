@@ -9,6 +9,7 @@ public class Device {
     private double timeWhenWillBeFree; // Время, когда прибор освободится
     private final int deviceId;
     private double totalTimeWorked; // Общее время работы прибора
+    private double currentServiceTime; // Время обслуживания текущей заявки
 
     public Device(int deviceId) {
         this.deviceId = deviceId;
@@ -46,9 +47,10 @@ public class Device {
         if (isBusy) {
             throw new IllegalStateException("Прибор уже занят обработкой.");
         }
+        this.currentServiceTime = getExponentialServiceTime(); // Устанавливаем время обслуживания заявки
         this.currentRequest = request;
         this.isBusy = true;
-        this.timeWhenWillBeFree = currentTime + getExponentialServiceTime();
+        this.timeWhenWillBeFree = currentTime + currentServiceTime; // Используем currentServiceTime вместо getExponentialServiceTime()
         System.out.println("Прибор ID: " + deviceId + " начал обрабатывать заявку: " + request.toString());
     }
 
@@ -91,6 +93,13 @@ public class Device {
 
     public double getTimeWhenWillBeFree() {
         return timeWhenWillBeFree;
+    }
+
+    public double getServiceTimeForRequest(Request request) {
+        if (currentRequest != null && currentRequest.equals(request)) {
+            return currentServiceTime;
+        }
+        return 0; // или вернуть другое значение или исключение, если заявка не обрабатывается в данный момент
     }
 
 }
