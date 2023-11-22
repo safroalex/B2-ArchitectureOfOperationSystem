@@ -11,15 +11,15 @@ public class SystemSimulation {
     private double currentModelTime;
     private Statistics statistics;
 
-    public SystemSimulation(int totalSources, int totalDevices, double minInterval, double maxInterval, int bufferCapacity) {
+    public SystemSimulation(Statistics statistics, int totalSources, int totalDevices, double minInterval, double maxInterval, int bufferCapacity) {
         this.sources = new ArrayList<>();
         this.devices = new ArrayList<>();
-        this.buffer = new Buffer(bufferCapacity);
+        this.buffer = new Buffer(statistics ,bufferCapacity);
         this.currentModelTime = 0;
-        this.statistics = new Statistics();
+        this.statistics = statistics;
 
         for (int i = 0; i < totalSources; i++) {
-            sources.add(new Source(i, minInterval, maxInterval));
+            sources.add(new Source(statistics ,i, minInterval, maxInterval));
         }
 
         for (int i = 0; i < totalDevices; i++) {
@@ -48,7 +48,7 @@ public class SystemSimulation {
                 Request bufferedRequest = buffer.getRequest();
                 if (bufferedRequest != null) {
                     device.takeRequest(bufferedRequest, currentModelTime);
-                    System.out.println("Заявка из буфера обработана прибором: " + device);
+                    System.out.println("zayavka-iz-bufera-obrabotana-priborom: " + device);
                 }
             }
         }
@@ -56,7 +56,7 @@ public class SystemSimulation {
         for (Source source : sources) {
             Request request = source.generateRequest();
             if (request != null) {
-                System.out.println("Заявка сгенерирована: " + request);
+                System.out.println("zayavka-sgenerirovana: " + request);
                 processRequest(request);
             }
         }
@@ -67,11 +67,11 @@ public class SystemSimulation {
         if (freeDevice != null) {
             // считаем статистику для времени обслуживания
             double serviceTime = freeDevice.getServiceTimeForRequest(request);
-            statistics.addServiceTime(request.getSourceId(), serviceTime);
-            statistics.addServiceTimeSquared(request.getSourceId(), Math.pow(serviceTime, 2));
+            //statistics.addServiceTime(request.getSourceId(), serviceTime);
+            //statistics.addServiceTimeSquared(request.getSourceId(), Math.pow(serviceTime, 2));
 
             freeDevice.takeRequest(request, currentModelTime);
-            System.out.println("Заявка обработывается прибором: " + freeDevice);
+            System.out.println("zayavka-obrabotyvaetsya-priborom: " + freeDevice);
         } else {
             // Если все приборы заняты, попытка добавить заявку в буфер.
             boolean addedToBuffer = buffer.addToBuffer_D1OZ2(request, currentModelTime);
@@ -79,13 +79,13 @@ public class SystemSimulation {
                 // если заявка все еще в буфере, считаем статистику для времени ожидания
                 if (buffer.requests.contains(request)) { // проверяем, что заявка все еще в буфере
                     double waitTime = buffer.getWaitTimeForRequest(request, currentModelTime);
-                    statistics.addWaitTime(request.getSourceId(), waitTime);
-                    statistics.addWaitTimeSquared(request.getSourceId(), Math.pow(waitTime, 2));
+                   // statistics.addWaitTime(request.getSourceId(), waitTime);
+                    //statistics.addWaitTimeSquared(request.getSourceId(), Math.pow(waitTime, 2));
                 }
 
-                System.out.println("Заявка добавлена в буфер: " + request);
+                System.out.println("zayavka-dobavlena-v-bufer: " + request);
             } else {
-                System.out.println("Заявка отклонена: " + request);
+                System.out.println("zayavka-otklonena: " + request);
             }
         }
     }
@@ -93,20 +93,21 @@ public class SystemSimulation {
     public String getStatus() {
         StringBuilder status = new StringBuilder();
 
-        status.append("Текущее время модели: ").append(currentModelTime).append("\n");
+        status.append("tekushchee-vremya-modeli: ").append(currentModelTime).append("\n");
 
-        status.append("Источники:\n");
+        status.append("istochniki:\n");
         for (Source source : sources) {
-            status.append(source.toString()).append("\n"); // Предполагается, что у класса Source есть переопределенный метод toString()
+            statistics.addServiceTime(source.getSourceId() ,source.getAverageServiceTime());
+            status.append(source.toString()).append("\n");
         }
 
-        status.append("Приборы:\n");
+        status.append("pribory:\n");
         for (Device device : devices) {
-            status.append(device.toString()).append("\n"); // Предполагается, что у класса Device есть переопределенный метод toString()
+            status.append(device.toString()).append("\n");
         }
 
-        status.append("Буфер:\n");
-        status.append(buffer.toString()); // Предполагается, что у класса Buffer есть переопределенный метод toString()
+        status.append("bufer:\n");
+        status.append(buffer.toString());
 
         return status.toString();
     }
@@ -114,8 +115,7 @@ public class SystemSimulation {
     public String getStatistics() {
         StringBuilder statistics = new StringBuilder();
 
-        statistics.append("\nСтатистика:\n");
-        statistics.append(statistics.toString()); // Предполагается, что у класса Statistics есть переопределенный метод toString()
+        statistics.append(this.statistics.toString());
 
         return statistics.toString();
     }

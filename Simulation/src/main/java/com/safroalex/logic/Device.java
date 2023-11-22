@@ -24,14 +24,14 @@ public class Device {
         builder.append("Device ID: ").append(deviceId).append(", ");
 
         if (isBusy) {
-            builder.append("Статус: Занят, ");
-            builder.append("Освободится в: ").append(timeWhenWillBeFree).append(", ");
-            builder.append("Текущая заявка: ").append(currentRequest);
+            builder.append("status-zanyat, ");
+            builder.append("osvoboditsya-v: ").append(timeWhenWillBeFree).append(", ");
+            builder.append("tekushchaya-zayavka: ").append(currentRequest);
         } else {
-            builder.append("Статус: Свободен");
+            builder.append("status-svoboden");
         }
 
-        builder.append(", Время работы: ").append(totalTimeWorked);
+        builder.append(", vremya-raboty: ").append(totalTimeWorked);
 
         return builder.toString();
     }
@@ -45,22 +45,22 @@ public class Device {
     // Принять заявку на обработку
     public void takeRequest(Request request, double currentTime) {
         if (isBusy) {
-            throw new IllegalStateException("Прибор уже занят обработкой.");
+            throw new IllegalStateException("pribor-uzhe-zanyat-obrabotkoj.");
         }
         this.currentServiceTime = getExponentialServiceTime(); // Устанавливаем время обслуживания заявки
         this.currentRequest = request;
         this.isBusy = true;
         this.timeWhenWillBeFree = currentTime + currentServiceTime; // Используем currentServiceTime вместо getExponentialServiceTime()
-        System.out.println("Прибор ID: " + deviceId + " начал обрабатывать заявку: " + request.toString());
+        System.out.println("pribor ID: " + deviceId + " nachal-obrabatyvat-zayavku: " + request.toString());
     }
 
     // Завершить обработку текущей заявки
     public Request finishProcessing(double currentTime, List<Source> sources) {
         if (!isBusy) {
-            throw new IllegalStateException("Прибор не обрабатывает заявку.");
+            throw new IllegalStateException("pribor-ne-obrabatyvaet-zayavku.");
         }
         if (currentTime < timeWhenWillBeFree) {
-            throw new IllegalArgumentException("Обработка заявки еще не завершена.");
+            throw new IllegalArgumentException("obrabotka-zayavki-eshche-ne-zavershena.");
         }
         this.totalTimeWorked += (timeWhenWillBeFree - currentTime);
         this.isBusy = false;
@@ -70,7 +70,7 @@ public class Device {
         if (source != null) {
             source.informRequestCompletion(currentRequest, timeWhenWillBeFree);
         }
-        System.out.println("Прибор ID: " + deviceId + " завершил обработку заявки: " + currentRequest.toString());
+        System.out.println("pribor ID: " + deviceId + " zavershil-obrabotku-zayavki: " + currentRequest.toString());
 
         return currentRequest;
     }

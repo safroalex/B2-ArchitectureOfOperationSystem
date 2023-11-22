@@ -10,21 +10,23 @@ public class TestSimulation {
         int totalSteps = 5;       // Количество шагов моделирования
         int bufferCapacity = 5;   // Вместимость буффера
 
+        Statistics mainStatistic = new Statistics();
+
         SystemSimulation simulation
                 = new SystemSimulation
-                (totalSources, totalDevices, minInterval, maxInterval, bufferCapacity);
+                (mainStatistic ,totalSources, totalDevices, minInterval, maxInterval, bufferCapacity);
 
         for (int i = 0; i < totalSteps; i++) {
             System.out.println("=====================================");
-            System.out.println("Шаг " + (i + 1));
+            System.out.println("shag " + (i + 1));
             simulation.step();
             System.out.println(simulation.getStatus());
         }
 
         System.out.println("=====================================");
-        System.out.println("Отклоненные заявки:");
+        System.out.println("otklonennye-zayavki:");
         System.out.println(RejectionHandler.getRejectedRequests());
 
-        // TODO: //System.out.println(simulation.getStatistics());
+         System.out.println(simulation.getStatistics());
     }
 }

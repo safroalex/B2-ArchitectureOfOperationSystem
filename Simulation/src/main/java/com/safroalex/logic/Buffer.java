@@ -5,8 +5,10 @@ import java.util.LinkedList;
 public class Buffer {
     private final int capacity; // Максимальная вместимость буфера
     protected final LinkedList<Request> requests; // Список заявок в буфере
+    private Statistics statistics;
 
-    public Buffer(int capacity) {
+    public Buffer(Statistics statistics, int capacity) {
+        this.statistics = statistics;
         this.capacity = capacity;
         this.requests = new LinkedList<>();
     }
@@ -35,6 +37,7 @@ public class Buffer {
     // Обработка отказа по правилу D1OO4 (отбрасывание самой последней заявки)
     private void handleRejection_D1OO4(Request newRequest, double currentTime) {
         Request lastRequest = requests.removeLast();
+        statistics.addRequestDenied(lastRequest.getSourceId());
         RejectionHandler.addRejectedRequest(lastRequest);
         newRequest.setEntryTime(currentTime); // Устанавливаем время входа в буфер для новой заявки
         requests.addLast(newRequest);

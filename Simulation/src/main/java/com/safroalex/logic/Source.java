@@ -11,7 +11,9 @@ public class Source {
     private final double maxInterval;
     private final int sourceId;
     private final List<Request> requests = new ArrayList<>();
-    public Source(int sourceId, double minInterval, double maxInterval) {
+    private final Statistics statistics;
+    public Source(Statistics statistics ,int sourceId, double minInterval, double maxInterval) {
+        this.statistics = statistics;
         this.sourceId = sourceId;
         this.minInterval = minInterval;
         this.maxInterval = maxInterval;
@@ -32,6 +34,7 @@ public class Source {
         double creationTime = getNextCreationTime();
         Request newRequest = new Request(sourceId, totalGeneratedRequests, creationTime);
         requests.add(newRequest);  // Добавляем заявку в лист
+        statistics.addRequestGenerated(newRequest.getSourceId());
         return newRequest;
     }
 
@@ -50,7 +53,9 @@ public class Source {
     public double getAverageServiceTime() {
         double sum = 0;
         for (Request request : requests) {
-            sum += request.getCompletionTime() - request.getCreationTime();
+            if (request.getCompletionTime() > 0) {
+                sum += request.getCompletionTime() - request.getCreationTime();
+            }
         }
         return sum / totalGeneratedRequests;
     }
