@@ -93,20 +93,20 @@ public class SystemSimulation {
     public String getStatus() {
         StringBuilder status = new StringBuilder();
 
-        status.append("tekushchee-vremya-modeli: ").append(currentModelTime).append("\n");
+        status.append("TIME: ").append(currentModelTime).append("\n");
 
-        status.append("istochniki:\n");
+        status.append("SOURCES:\n");
         for (Source source : sources) {
             statistics.addServiceTime(source.getSourceId() ,source.getAverageServiceTime());
             status.append(source.toString()).append("\n");
         }
 
-        status.append("pribory:\n");
+        status.append("DEVICES:\n");
         for (Device device : devices) {
             status.append(device.toString()).append("\n");
         }
 
-        status.append("bufer:\n");
+        status.append("BUFFER:\n");
         status.append(buffer.toString());
 
         return status.toString();

@@ -90,9 +90,6 @@ public class MainWindow extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 
     // Класс для данных, отображаемых в таблице
     public static class SourceData {
