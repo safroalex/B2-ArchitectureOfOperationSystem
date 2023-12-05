@@ -9,16 +9,15 @@ import javafx.application.Application;
 
 
 public class App {
-    // Статическая переменная для определения, какое окно открывать
     private static final int WINDOW_TYPE = 0; // 0 для StatisticsWindow или 1 для MainWindow
 
     public static void main(String[] args) {
-        int totalSources = 5;     // Количество источников
-        int totalDevices = 2;     // Количество приборов (больше, чем источников)
+        int totalSources = 4;     // Количество источников
+        int totalDevices = 3;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
         int bufferCapacity = 5;   // Вместимость буффера
-        int totalSteps = 5;       // Количество шагов моделирования
+        int totalSteps = 6;       // Количество шагов моделирования
 
         Statistics mainStatistic = new Statistics();
         SystemSimulationInstance.initialize(mainStatistic,

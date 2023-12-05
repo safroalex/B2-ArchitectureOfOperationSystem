@@ -6,11 +6,11 @@ import java.util.Map;
 public class Statistics {
     private Map<Integer, Integer> requestsGeneratedBySource = new HashMap<>(); // источник -> количество заявок
     private Map<Integer, Integer> requestsDeniedBySource = new HashMap<>();   // источник -> количество отказов
+    private Map<Integer, Double> ratioOfDenials = new HashMap<>();
     private Map<Integer, Double> totalServiceTimeBySource = new HashMap<>();  // источник -> суммарное время обслуживания
     private Map<Integer, Double> totalWaitTimeBySource = new HashMap<>();     // источник -> суммарное время ожидания
     private Map<Integer, Double> totalServiceTimeSquaredBySource = new HashMap<>();  // источник -> сумма квадратов времени обслуживания
     private Map<Integer, Double> totalWaitTimeSquaredBySource = new HashMap<>();     // источник -> сумма квадратов времени ожидания
-
     private Map<Integer, Double> deviceUsageTime = new HashMap<>();           // прибор -> суммарное время занятости
 
     @Override
@@ -28,6 +28,25 @@ public class Statistics {
         for (Map.Entry<Integer, Integer> entry : requestsDeniedBySource.entrySet()) {
             sb.append("Source ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
+
+        sb.append("Ratio of requests denied by source:\n");
+        for (Map.Entry<Integer, Integer> entry : requestsDeniedBySource.entrySet()) {
+            Integer source = entry.getKey();
+            Integer denials = entry.getValue();
+            Integer totalRequests = requestsGeneratedBySource.get(source) + denials;
+            Double ratio = (double) denials / totalRequests;
+
+            ratioOfDenials.put(source, ratio);
+        }
+
+        for (Map.Entry<Integer, Double> entry : ratioOfDenials.entrySet()) {
+            sb.append("Source ").append(entry.getKey()).append(": ").append(String.format("%.2f", entry.getValue())).append("\n");
+        }
+
+
+// Теперь ratioOfDenials содержит отношение отказов к общему количеству заявок для каждого источника
+
+
 
         sb.append("Total service time by source:\n");
         for (Map.Entry<Integer, Double> entry : totalServiceTimeBySource.entrySet()) {
@@ -75,6 +94,10 @@ public class Statistics {
 
     public int getTotalRequestsGeneratedBySource(int sourceId) {
         return requestsGeneratedBySource.getOrDefault(sourceId, 0);
+    }
+
+    public int getRequestsDeniedBySource(int sourceId) {
+        return requestsDeniedBySource.getOrDefault(sourceId, 0);
     }
 
     public double getDenialProbability(int sourceId) {

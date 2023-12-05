@@ -3,13 +3,15 @@ package com.safroalex.logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.safroalex.utils.SimulationParameters.totalSources;
+
 public class SystemSimulation {
 
     private List<Source> sources;
     private List<Device> devices;
     private Buffer buffer;
     private double currentModelTime;
-    private Statistics statistics;
+    private final Statistics statistics;
 
     public SystemSimulation(Statistics statistics, int totalSources, int totalDevices, double minInterval, double maxInterval, int bufferCapacity) {
         this.sources = new ArrayList<>();
@@ -25,6 +27,10 @@ public class SystemSimulation {
         for (int i = 0; i < totalDevices; i++) {
             devices.add(new Device(i));
         }
+    }
+
+    public Statistics getStatisticObject() {
+        return this.statistics;
     }
 
     private Device findFreeDevice() {
@@ -113,11 +119,11 @@ public class SystemSimulation {
     }
 
     public String getStatistics() {
-        StringBuilder statistics = new StringBuilder();
+        StringBuilder statistic = new StringBuilder();
 
-        statistics.append(this.statistics.toString());
+        statistic.append(this.statistics.toString());
 
-        return statistics.toString();
+        return statistic.toString();
     }
 
 

@@ -2,7 +2,7 @@ package com.safroalex.utils;
 
 public class SimulationParameters {
     private static int totalSteps;
-    private static int totalSources;     // Количество источников
+    public static int totalSources;     // Количество источников
     private static int totalDevices;     // Количество приборов (больше, чем источников)
     private static double minInterval; // Минимальный интервал между заявками
     private static double maxInterval;   // Максимальный интервал между заявками

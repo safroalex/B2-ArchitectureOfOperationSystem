@@ -1,5 +1,9 @@
 package com.safroalex.ui;
 
+import com.safroalex.logic.Statistics;
+import com.safroalex.logic.SystemSimulation;
+import com.safroalex.utils.SimulationParameters;
+import com.safroalex.utils.SystemSimulationInstance;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,9 +18,18 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
 public class MainWindow extends Application {
-
+    SystemSimulation simulation = SystemSimulationInstance.getInstance();
+    int totalSteps = SimulationParameters.getTotalSteps();
+    int totalSources = SimulationParameters.getTotalSources();
+    int totalDevices = SimulationParameters.getTotalDevices();
+    double minInterval = SimulationParameters.getMinInterval();
+    double maxInterval = SimulationParameters.getMaxInterval();
+    int bufferCapacity = SimulationParameters.getBufferCapacity();
+    Statistics statistics = simulation.getStatisticObject();
     @Override
     public void start(Stage primaryStage) {
+
+
         // Создаем таблицу
         TableView<SourceData> table = new TableView<>();
 
@@ -48,13 +61,11 @@ public class MainWindow extends Application {
         // Добавляем столбцы в таблицу
         table.getColumns().addAll(sourceNumberCol, requestCountCol, rejectedCountCol, avgStayTimeCol, avgBufferTimeCol, avgServiceTimeCol, varianceServiceTimeCol, varianceBufferTimeCol);
 
-        // Создаем и добавляем данные в таблицу
-        ObservableList<SourceData> data = FXCollections.observableArrayList(
-                new SourceData(1, 5, 3, 1.0, 0.5, 2.0, 0.1, 0.2)
-                //  здесь остальные данные
-        );
+        ObservableList<SourceData> data = FXCollections.observableArrayList();
+        for (int i = 0; i < totalSources; i++) {
+            data.add(new SourceData(i));
+        }
         table.setItems(data);
-
 
 
 
@@ -68,15 +79,6 @@ public class MainWindow extends Application {
         utilizationCol.setCellValueFactory(new PropertyValueFactory<>("utilizationCoefficient"));
 
         deviceTable.getColumns().addAll(deviceNumberCol, utilizationCol);
-
-        // Добавляем данные во вторую таблицу
-        ObservableList<DeviceData> deviceData = FXCollections.observableArrayList(
-                new DeviceData(1, 0.75)
-                //  здесь остальные данные
-        );
-        deviceTable.setItems(deviceData);
-
-
 
         // Располагаем обе таблицы в VBox
         VBox vbox = new VBox(table, deviceTable);
@@ -92,29 +94,16 @@ public class MainWindow extends Application {
 
 
     // Класс для данных, отображаемых в таблице
-    public static class SourceData {
+    public class SourceData {
         private final SimpleIntegerProperty sourceNumber;
-        private final SimpleIntegerProperty requestCount;
-        private final SimpleIntegerProperty rejectedCount;
-        private final SimpleDoubleProperty avgStayTime;
-        private final SimpleDoubleProperty avgBufferTime;
-        private final SimpleDoubleProperty avgServiceTime;
-        private final SimpleDoubleProperty varianceServiceTime;
-        private final SimpleDoubleProperty varianceBufferTime;
 
-        public SourceData(int sourceNumber, int requestCount, int rejectedCount,
-                          double avgStayTime, double avgBufferTime, double avgServiceTime,
-                          double varianceServiceTime, double varianceBufferTime) {
+        public SourceData(int sourceNumber) {
             this.sourceNumber = new SimpleIntegerProperty(sourceNumber);
-            this.requestCount = new SimpleIntegerProperty(requestCount);
-            this.rejectedCount = new SimpleIntegerProperty(rejectedCount);
-            this.avgStayTime = new SimpleDoubleProperty(avgStayTime);
-            this.avgBufferTime = new SimpleDoubleProperty(avgBufferTime);
-            this.avgServiceTime = new SimpleDoubleProperty(avgServiceTime);
-            this.varianceServiceTime = new SimpleDoubleProperty(varianceServiceTime);
-            this.varianceBufferTime = new SimpleDoubleProperty(varianceBufferTime);
-
         }
+
+
+
+
 
         public int getSourceNumber() {
             return sourceNumber.get();
@@ -122,22 +111,6 @@ public class MainWindow extends Application {
 
         public void setSourceNumber(int value) {
             sourceNumber.set(value);
-        }
-
-        public int getRequestCount() {
-            return requestCount.get();
-        }
-
-        public void setRequestCount(int value) {
-            requestCount.set(value);
-        }
-
-        public int getRejectedCount() {
-            return rejectedCount.get();
-        }
-
-        public void setRejectedCount(int value) {
-            rejectedCount.set(value);
         }
     }
 
