@@ -13,6 +13,10 @@ public class Statistics {
     private Map<Integer, Double> totalWaitTimeSquaredBySource = new HashMap<>();     // источник -> сумма квадратов времени ожидания
     private Map<Integer, Double> deviceUsageTime = new HashMap<>();           // прибор -> суммарное время занятости
 
+    private int requestsBufferSize;
+    private boolean statusBufferIsEmpty;
+    private boolean statusBufferIsFull;
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -125,5 +129,28 @@ public class Statistics {
 
     public double getDeviceUtilizationCoefficient(int deviceId, double totalSimulationTime) {
         return deviceUsageTime.getOrDefault(deviceId, 0.0) / totalSimulationTime;
+    }
+
+    public void setRequestsBufferSize(int size) {
+        this.requestsBufferSize = size;
+    }
+    public int getRequestsBufferSize() {
+        return requestsBufferSize;
+    }
+
+    public void setBufferIsEmpty(boolean status) {
+        this.statusBufferIsEmpty = status;
+    }
+
+    public boolean getBufferIsEmpty() {
+        return this.statusBufferIsEmpty;
+    }
+
+    public void setBufferIsFull(boolean status) {
+        this.statusBufferIsFull = status;
+    }
+
+    public boolean getBufferIsFull() {
+        return this.statusBufferIsFull;
     }
 }

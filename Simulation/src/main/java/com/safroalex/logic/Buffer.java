@@ -59,6 +59,9 @@ public class Buffer {
         return 0; // или вернуть другое значение или исключение, если заявка не находится в буфере
     }
 
+    public int getRequestsCount() {
+        return requests.size();
+    }
     // Проверка, пуст ли буфер
     public boolean isEmpty() {
         return requests.isEmpty();

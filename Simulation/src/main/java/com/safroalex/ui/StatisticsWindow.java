@@ -6,6 +6,7 @@ import com.safroalex.logic.SystemSimulation;
 import com.safroalex.utils.SimulationParameters;
 import com.safroalex.utils.SystemSimulationInstance;
 import javafx.application.Application;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
@@ -29,6 +30,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.geometry.Pos;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class StatisticsWindow extends Application {
     SystemSimulation simulation = SystemSimulationInstance.getInstance();
@@ -47,7 +50,7 @@ public class StatisticsWindow extends Application {
         // Добавляем информацию для каждой категории
         root.getChildren().add(createInfoBox("Общее количество источников: ", totalSources, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/sensor.png"));
         root.getChildren().add(createInfoBox("Общее количество приборов: ", totalDevices, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/device.png"));
-        root.getChildren().add(createInfoBox("Общее количество шагов: ", totalSteps, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/time.png"));
+        //root.getChildren().add(createInfoBox("Общее количество шагов: ", totalSteps, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/time.png"));
         root.getChildren().add(createInfoBox("Минимальный интервал: ", minInterval, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/interval.png"));
         root.getChildren().add(createInfoBox("Максимальный интервал: ", maxInterval, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/interval.png"));
         root.getChildren().add(createInfoBox("Вместимость буфера: ", bufferCapacity, "file:/Users/anon/GITREPOS/PERSONAL/B2-SimulationModeling/Simulation/src/main/resources/buffer.png"));
@@ -57,32 +60,73 @@ public class StatisticsWindow extends Application {
         textArea.setEditable(false);
         textArea.setPrefSize(600, 400);
 
-        // Заполняем TextArea информацией
-        for (int i = 0; i < totalSteps; i++) {
-            textArea.appendText("=====================================\n");
-            //textArea.appendText("Шаг " + (i + 1) + "\n");
-            simulation.step();
-            textArea.appendText(simulation.getStatus() + "\n");
-        }
+        // Переменная для хранения общего количества заявок
+        AtomicInteger totalRequestsCount = new AtomicInteger(0);
 
+        // Создаем контейнер для прямоугольников источников
+        VBox sourceRectanglesContainer = new VBox();
+        HBox sourceRectangles = createSourceRectangles(totalSources, totalRequestsCount.get());
+        sourceRectanglesContainer.getChildren().add(sourceRectangles);
+        root.getChildren().add(sourceRectanglesContainer);
 
-        HBox sourceRectangles = createSourceRectangles(totalSources);
-        root.getChildren().add(sourceRectangles);
+        StackPane bufferStatusDisplay = createBufferStatusDisplay(0,
+                true,
+                false);
+        VBox bufferStatusContainer = new VBox(bufferStatusDisplay);
+        root.getChildren().add(bufferStatusContainer);
 
+        VBox deviceTreeContainer = new VBox();
         VBox deviceTree = createDeviceTree(totalDevices, statistics, totalSources);
-        root.getChildren().add(deviceTree);
+        deviceTreeContainer.getChildren().add(deviceTree);
+        root.getChildren().add(deviceTreeContainer);
 
         StackPane rejectedRequestsDisplay = createRejectedRequestsDisplay();
-        root.getChildren().add(rejectedRequestsDisplay);
+        VBox rejectedRequestsContainer = new VBox(rejectedRequestsDisplay);
+        root.getChildren().add(rejectedRequestsContainer);
 
 
-        textArea.appendText("=====================================\n");
-        textArea.appendText("Отклоненные заявки:\n");
-        textArea.appendText(RejectionHandler.getRejectedRequests() + "\n");
 
-        textArea.appendText(simulation.getStatistics() + "\n");
+        // Создаем кнопку для перехода к следующему шагу
+        Button nextStepButton = new Button("Следующий шаг");
+        nextStepButton.setOnAction(e -> {
+            // Вызываем метод следующего шага симуляции
+            simulation.step();
 
-        root.getChildren().add(textArea);
+            // Увеличиваем количество заявок
+            totalRequestsCount.incrementAndGet();
+
+            // Пересоздаем прямоугольники с новым количеством заявок
+            HBox updatedSourceRectangles = createSourceRectangles(totalSources, totalRequestsCount.get());
+            sourceRectanglesContainer.getChildren().set(0, updatedSourceRectangles); // Обновляем содержимое контейнера
+
+            // Обновляем дерево устройств с новыми данными
+            VBox updatedDeviceTree = createDeviceTree(totalDevices, statistics, totalSources);
+            deviceTreeContainer.getChildren().set(0, updatedDeviceTree);
+
+            // Обновление отображения буфера
+            StackPane updatedBufferStatusDisplay = createBufferStatusDisplay(
+                    statistics.getRequestsBufferSize(),
+                    statistics.getBufferIsEmpty(),
+                    statistics.getBufferIsFull());
+            bufferStatusContainer.getChildren().set(0, updatedBufferStatusDisplay);
+
+            // Обновляем отображение отклоненных заявок
+            StackPane updatedRejectedRequestsDisplay = createRejectedRequestsDisplay();
+            rejectedRequestsContainer.getChildren().set(0, updatedRejectedRequestsDisplay);
+
+            // Обновляем TextArea с новым состоянием симуляции
+            textArea.appendText("=====================================\n");
+            textArea.appendText(simulation.getAndSetStatus() + "\n");
+
+            textArea.appendText("Отклоненные заявки:\n");
+            textArea.appendText(RejectionHandler.getRejectedRequests() + "\n");
+
+            textArea.appendText(String.valueOf(statistics.getBufferIsEmpty()));
+            textArea.appendText(String.valueOf(statistics.getBufferIsFull()));
+            textArea.appendText(String.valueOf(statistics.getRequestsBufferSize()));
+        });
+
+        root.getChildren().addAll(nextStepButton, textArea);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(root);
@@ -91,7 +135,7 @@ public class StatisticsWindow extends Application {
         Scene scene = new Scene(scrollPane, 700, 500);
 
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Пошаговая Симуляции");
+        primaryStage.setTitle("Пошаговая Симуляция");
         primaryStage.show();
     }
 
@@ -109,12 +153,12 @@ public class StatisticsWindow extends Application {
         return box;
     }
 
-    private HBox createSourceRectangles(int totalSources) {
+    private HBox createSourceRectangles(int totalSources, int requestsPerSource) {
         HBox rectanglesBox = new HBox(10);
         rectanglesBox.setAlignment(Pos.CENTER);
 
         for (int i = 0; i < totalSources; i++) {
-            int requestsCount = (totalSources * totalSteps) / totalSources;
+            int requestsCount = requestsPerSource;
 
             // Создаем прямоугольник с градиентной заливкой
             Rectangle rectangle = new Rectangle(60, 40);
@@ -231,6 +275,33 @@ public class StatisticsWindow extends Application {
         return stackPane;
     }
 
+    private StackPane createBufferStatusDisplay(int bufferSize, boolean isBufferEmpty, boolean isBufferFull) {
+
+        // Выбираем цвет в зависимости от состояния буфера
+        Color bufferColor;
+        if (isBufferFull) {
+            bufferColor = Color.RED; // Буфер полон
+        } else if (isBufferEmpty) {
+            bufferColor = Color.GREEN; // Буфер пуст
+        } else {
+            bufferColor = Color.YELLOW; // Буфер частично заполнен
+        }
+
+        // Создаем прямоугольник
+        Rectangle rectangle = new Rectangle(100, 50);
+        rectangle.setFill(bufferColor);
+
+        // Создаем текст для отображения размера буфера
+        Text text = new Text(String.valueOf(bufferSize));
+        text.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        text.setFill(Color.BLACK);
+
+        // Группируем прямоугольник и текст в StackPane
+        StackPane stackPane = new StackPane();
+        stackPane.getChildren().addAll(rectangle, text);
+
+        return stackPane;
+    }
 
 }
 

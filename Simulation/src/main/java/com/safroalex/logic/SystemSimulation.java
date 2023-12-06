@@ -3,8 +3,6 @@ package com.safroalex.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.safroalex.utils.SimulationParameters.totalSources;
-
 public class SystemSimulation {
 
     private List<Source> sources;
@@ -96,7 +94,11 @@ public class SystemSimulation {
         }
     }
 
-    public String getStatus() {
+    public String getAndSetStatus() {
+        statistics.setRequestsBufferSize(buffer.getRequestsCount());
+        statistics.setBufferIsEmpty(buffer.isEmpty());
+        statistics.setBufferIsFull(buffer.isFull());
+
         StringBuilder status = new StringBuilder();
 
         status.append("TIME: ").append(currentModelTime).append("\n");

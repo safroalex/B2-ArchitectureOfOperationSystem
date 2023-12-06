@@ -7,7 +7,7 @@ public class TestSimulation {
         int totalDevices = 3;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
-        int totalSteps = 5;       // Количество шагов моделирования
+        int totalSteps = 4;       // Количество шагов моделирования
         int bufferCapacity = 5;   // Вместимость буффера
 
         Statistics mainStatistic = new Statistics();
@@ -21,7 +21,7 @@ public class TestSimulation {
             System.out.println("=====================================");
             System.out.println("shag " + (i + 1));
             simulation.step();
-            System.out.println(simulation.getStatus());
+            System.out.println(simulation.getAndSetStatus());
         }
 
         System.out.println("=====================================");

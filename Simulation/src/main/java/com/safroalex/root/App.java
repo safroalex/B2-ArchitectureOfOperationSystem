@@ -13,7 +13,7 @@ public class App {
 
     public static void main(String[] args) {
         int totalSources = 4;     // Количество источников
-        int totalDevices = 3;     // Количество приборов
+        int totalDevices = 4;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
         int bufferCapacity = 5;   // Вместимость буффера
