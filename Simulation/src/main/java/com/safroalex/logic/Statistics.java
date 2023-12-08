@@ -47,11 +47,6 @@ public class Statistics {
             sb.append("Source ").append(entry.getKey()).append(": ").append(String.format("%.2f", entry.getValue())).append("\n");
         }
 
-
-// Теперь ratioOfDenials содержит отношение отказов к общему количеству заявок для каждого источника
-
-
-
         sb.append("Total service time by source:\n");
         for (Map.Entry<Integer, Double> entry : totalServiceTimeBySource.entrySet()) {
             sb.append("Source ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
@@ -102,6 +97,14 @@ public class Statistics {
 
     public int getRequestsDeniedBySource(int sourceId) {
         return requestsDeniedBySource.getOrDefault(sourceId, 0);
+    }
+
+    public double getRatioOfDenials(int sourceID) {
+        return ratioOfDenials.getOrDefault(sourceID, 0.0);
+    }
+
+    public double getTotalServiceTimeBySource(int sourceID) {
+        return totalServiceTimeBySource.getOrDefault(sourceID, 0.0);
     }
 
     public double getDenialProbability(int sourceId) {

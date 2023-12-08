@@ -1,4 +1,4 @@
-package com.safroalex.ui;
+package com.safroalex.ui.windows;
 
 import com.safroalex.logic.RejectionHandler;
 import com.safroalex.logic.Statistics;
