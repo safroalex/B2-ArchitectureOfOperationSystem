@@ -15,10 +15,10 @@ public class DeviceData {
         this.utilizationCoefficient = new SimpleDoubleProperty(utilizationCoefficient);
     }
 
-    public static ObservableList<DeviceData> createDeviceDataList(int totalDevices, Statistics statistics) {
+    public static ObservableList<DeviceData> createDeviceDataList(int totalDevices, Statistics statistics, int totalSteps) {
         ObservableList<DeviceData> data = FXCollections.observableArrayList();
         for (int i = 0; i < totalDevices; i++) {
-            data.add(new DeviceData(i,1.0));
+            data.add(new DeviceData(i,statistics.getDeviceUtilizationCoefficient(i, totalSteps)));
         }
         return data;
     }

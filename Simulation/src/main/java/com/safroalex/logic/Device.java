@@ -62,7 +62,7 @@ public class Device {
         if (currentTime < timeWhenWillBeFree) {
             throw new IllegalArgumentException("obrabotka-zayavki-eshche-ne-zavershena.");
         }
-        this.totalTimeWorked += (timeWhenWillBeFree - currentTime);
+        this.totalTimeWorked += currentTime;
         this.isBusy = false;
 
         // Уведомляем источник о завершении обработки
@@ -102,4 +102,15 @@ public class Device {
         return 0; // или вернуть другое значение или исключение, если заявка не обрабатывается в данный момент
     }
 
+    public int getDeviceId() {
+        return deviceId;
+    }
+
+    public double getTotalTimeWorked() {
+        return totalTimeWorked;
+    }
+
+    public Request getCurrentRequest() {
+        return currentRequest;
+    }
 }

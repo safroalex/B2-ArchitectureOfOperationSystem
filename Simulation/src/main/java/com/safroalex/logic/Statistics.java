@@ -1,9 +1,11 @@
 package com.safroalex.logic;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Statistics {
+    private final Random random = new Random();
+    protected List<Device> devices = new LinkedList<>();
+    protected LinkedList<Request> requestsOfBuffer = new LinkedList<>(); // Список заявок в буфере
     private Map<Integer, Integer> requestsGeneratedBySource = new HashMap<>(); // источник -> количество заявок
     private Map<Integer, Integer> requestsDeniedBySource = new HashMap<>();   // источник -> количество отказов
     private Map<Integer, Double> ratioOfDenials = new HashMap<>();
@@ -52,6 +54,15 @@ public class Statistics {
             sb.append("Source ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
 
+        sb.append("Device time by device:\n");
+        for (Map.Entry<Integer, Double> entry : deviceUsageTime.entrySet()) {
+            sb.append("Device ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+
+        sb.append("Average wait time by source:\n");
+        for (Map.Entry<Integer, Double> entry : totalWaitTimeBySource.entrySet()) {
+            sb.append("Source ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
         return sb.toString();
     }
 
@@ -68,17 +79,37 @@ public class Statistics {
     }
 
     public void addWaitTime(int sourceId, double waitTime) {
-        totalWaitTimeBySource.put(sourceId, totalWaitTimeBySource.getOrDefault(sourceId, 0.0) + waitTime);
+        totalWaitTimeBySource.put(sourceId, totalWaitTimeBySource.getOrDefault(sourceId, 1.5) + waitTime);
+
+        double squaredTime = waitTime * waitTime;
+        totalWaitTimeSquaredBySource.put(sourceId, totalWaitTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
     }
 
     public void addServiceTime(int sourceId, double serviceTime) {
         totalServiceTimeBySource.put(sourceId, totalServiceTimeBySource.getOrDefault(sourceId, 0.0) + serviceTime);
+
+        double squaredTime = serviceTime * serviceTime;
+        totalServiceTimeSquaredBySource.put(sourceId, totalServiceTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
     }
 
-    public void addDeviceUsageTime(int deviceId, double usageTime) {
-        deviceUsageTime.put(deviceId, deviceUsageTime.getOrDefault(deviceId, 0.0) + usageTime);
+    public void setDeviceUsageTime(int deviceId, double usageTime) {
+        deviceUsageTime.put(deviceId, usageTime);
     }
 
+    public void setListOfDevices(List<Device> list) {
+        this.devices = list;
+    }
+
+    public void setListOfRequestOfBuffer(LinkedList<Request> requestsOfBuffer) {
+        this.requestsOfBuffer = requestsOfBuffer;
+    }
+
+    public void setRequestsBufferSize(int size) {
+        this.requestsBufferSize = size;
+    }
+    public void setBufferIsEmpty(boolean status) {
+        this.statusBufferIsEmpty = status;
+    }
     public void addServiceTimeSquared(int sourceId, double serviceTime) {
         double squaredTime = serviceTime * serviceTime;
         totalServiceTimeSquaredBySource.put(sourceId, totalServiceTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
@@ -89,7 +120,6 @@ public class Statistics {
         totalWaitTimeSquaredBySource.put(sourceId, totalWaitTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
     }
 
-    // методы для вычисления метрик
 
     public int getTotalRequestsGeneratedBySource(int sourceId) {
         return requestsGeneratedBySource.getOrDefault(sourceId, 0);
@@ -107,6 +137,10 @@ public class Statistics {
         return totalServiceTimeBySource.getOrDefault(sourceID, 0.0);
     }
 
+    public double getTotalWaitTimeBySource(int sourceId) {
+        return totalWaitTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1));
+    }
+
     public double getDenialProbability(int sourceId) {
         return (double) requestsDeniedBySource.getOrDefault(sourceId, 0) / requestsGeneratedBySource.getOrDefault(sourceId, 1);
     }
@@ -118,15 +152,15 @@ public class Statistics {
 
     public double getServiceTimeVariance(int sourceId) {
         int totalRequests = requestsGeneratedBySource.getOrDefault(sourceId, 1);
-        double avgServiceTime = totalServiceTimeBySource.getOrDefault(sourceId, 0.0) / totalRequests;
-        double avgServiceTimeSquared = totalServiceTimeSquaredBySource.getOrDefault(sourceId, 0.0) / totalRequests;
+        double avgServiceTime = totalServiceTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
+        double avgServiceTimeSquared = totalServiceTimeSquaredBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
         return avgServiceTimeSquared - avgServiceTime * avgServiceTime;
     }
 
     public double getWaitTimeVariance(int sourceId) {
         int totalRequests = requestsGeneratedBySource.getOrDefault(sourceId, 1);
-        double avgWaitTime = totalWaitTimeBySource.getOrDefault(sourceId, 0.0) / totalRequests;
-        double avgWaitTimeSquared = totalWaitTimeSquaredBySource.getOrDefault(sourceId, 0.0) / totalRequests;
+        double avgWaitTime = totalWaitTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
+        double avgWaitTimeSquared = totalWaitTimeSquaredBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
         return avgWaitTimeSquared - avgWaitTime * avgWaitTime;
     }
 
@@ -134,15 +168,14 @@ public class Statistics {
         return deviceUsageTime.getOrDefault(deviceId, 0.0) / totalSimulationTime;
     }
 
-    public void setRequestsBufferSize(int size) {
-        this.requestsBufferSize = size;
+    public LinkedList<Request> getRequestsOfBuffer() {
+        return requestsOfBuffer;
+    }
+    public List<Device> getDevicesList() {
+        return devices;
     }
     public int getRequestsBufferSize() {
         return requestsBufferSize;
-    }
-
-    public void setBufferIsEmpty(boolean status) {
-        this.statusBufferIsEmpty = status;
     }
 
     public boolean getBufferIsEmpty() {

@@ -1,8 +1,6 @@
 package com.safroalex.ui.windows;
 
-import com.safroalex.logic.RejectionHandler;
-import com.safroalex.logic.Statistics;
-import com.safroalex.logic.SystemSimulation;
+import com.safroalex.logic.*;
 import com.safroalex.utils.SimulationParameters;
 import com.safroalex.utils.SystemSimulationInstance;
 import javafx.application.Application;
@@ -16,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -30,6 +29,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.geometry.Pos;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -69,14 +70,12 @@ public class StatisticsWindow extends Application {
         sourceRectanglesContainer.getChildren().add(sourceRectangles);
         root.getChildren().add(sourceRectanglesContainer);
 
-        StackPane bufferStatusDisplay = createBufferStatusDisplay(0,
-                true,
-                false);
+        StackPane bufferStatusDisplay = createBufferStatusDisplay(0);
         VBox bufferStatusContainer = new VBox(bufferStatusDisplay);
         root.getChildren().add(bufferStatusContainer);
 
         VBox deviceTreeContainer = new VBox();
-        VBox deviceTree = createDeviceTree(totalDevices, statistics, totalSources);
+        VBox deviceTree = createDeviceTree(statistics, totalSources);
         deviceTreeContainer.getChildren().add(deviceTree);
         root.getChildren().add(deviceTreeContainer);
 
@@ -87,7 +86,7 @@ public class StatisticsWindow extends Application {
 
 
         // Создаем кнопку для перехода к следующему шагу
-        Button nextStepButton = new Button("Следующий шаг");
+        Button nextStepButton = new Button("Next");
         nextStepButton.setOnAction(e -> {
             // Вызываем метод следующего шага симуляции
             simulation.step();
@@ -100,14 +99,12 @@ public class StatisticsWindow extends Application {
             sourceRectanglesContainer.getChildren().set(0, updatedSourceRectangles); // Обновляем содержимое контейнера
 
             // Обновляем дерево устройств с новыми данными
-            VBox updatedDeviceTree = createDeviceTree(totalDevices, statistics, totalSources);
+            VBox updatedDeviceTree = createDeviceTree(statistics, totalSources);
             deviceTreeContainer.getChildren().set(0, updatedDeviceTree);
 
             // Обновление отображения буфера
             StackPane updatedBufferStatusDisplay = createBufferStatusDisplay(
-                    statistics.getRequestsBufferSize(),
-                    statistics.getBufferIsEmpty(),
-                    statistics.getBufferIsFull());
+                    statistics.getRequestsBufferSize());
             bufferStatusContainer.getChildren().set(0, updatedBufferStatusDisplay);
 
             // Обновляем отображение отклоненных заявок
@@ -195,7 +192,8 @@ public class StatisticsWindow extends Application {
     }
 
 
-    private VBox createDeviceTree(int totalDevices, Statistics statistics, int totalSources) {
+    private VBox createDeviceTree(Statistics statistics, int totalSources) {
+        List<Device> devices = statistics.getDevicesList();
         int processed = 0;
         int totalProcessed = 0;
         for (int i = 0; i < totalSources; i++) {
@@ -206,45 +204,47 @@ public class StatisticsWindow extends Application {
         // Создаем корневой узел - текст с общим количеством обработанных заявок
         Text rootText = new Text(String.valueOf(totalProcessed));
         rootText.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        rootText.setFill(Color.FORESTGREEN); // Установка цвета текста
+        rootText.setFill(Color.FORESTGREEN);
 
-        // Создаем контейнер для прямоугольников
+        // Создаем контейнер для устройств
         HBox deviceBox = new HBox(10);
         deviceBox.setAlignment(Pos.CENTER);
 
-        // Генерируем прямоугольники для устройств
-        for (int i = 0; i < totalDevices; i++) {
+        // Генерируем элементы для каждого устройства
+        for (Device device : devices) {
+            Request currentRequest = device.getCurrentRequest();
+            String requestId = (currentRequest != null) ? String.valueOf(currentRequest.getRequestId()) : "None";
+            String sourceId = (currentRequest != null) ? String.valueOf(currentRequest.getSourceId()) : "None";
+
             // Создаем прямоугольник с градиентной заливкой
-            Rectangle rectangle = new Rectangle(60, 40);
+            Rectangle rectangle = new Rectangle(100, 60);
             LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
                     new Stop(0, Color.SKYBLUE), new Stop(1, Color.DEEPSKYBLUE));
             rectangle.setFill(gradient);
 
-            // Создаем текст
-            Text text = new Text("Dev");
+            // Текст с информацией о текущем запросе
+            Text text = new Text("Dev " + device.getDeviceId() + "\nReq: " + requestId + "\nSrc: " + sourceId);
             text.setFill(Color.WHITE);
+            text.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
 
             // Группируем прямоугольник и текст
             StackPane stack = new StackPane();
             stack.getChildren().addAll(rectangle, text);
 
-            // Добавление эффекта тени к прямоугольнику
+            // Добавление эффекта тени
             DropShadow shadow = new DropShadow();
             shadow.setColor(Color.GRAY);
             rectangle.setEffect(shadow);
 
-            // Добавляем группу в контейнер прямоугольников
+            // Добавляем группу в контейнер
             deviceBox.getChildren().add(stack);
         }
 
-        // Создаем VBox для корневого узла и контейнера прямоугольников
-        VBox treeContainer = new VBox(10);
-        treeContainer.setAlignment(Pos.TOP_CENTER);
+        // Группируем корневой узел и контейнер устройств в вертикальную структуру
+        VBox tree = new VBox(10, rootText, deviceBox);
+        tree.setAlignment(Pos.CENTER);
 
-        // Добавляем корневой узел и контейнер прямоугольников в VBox
-        treeContainer.getChildren().addAll(rootText, deviceBox);
-
-        return treeContainer;
+        return tree;
     }
 
 
@@ -275,34 +275,42 @@ public class StatisticsWindow extends Application {
         return stackPane;
     }
 
-    private StackPane createBufferStatusDisplay(int bufferSize, boolean isBufferEmpty, boolean isBufferFull) {
+    private StackPane createBufferStatusDisplay(int bufferSize) {
+        LinkedList<Request> requests = statistics.getRequestsOfBuffer();
 
-        // Выбираем цвет в зависимости от состояния буфера
-        Color bufferColor;
-        if (isBufferFull) {
-            bufferColor = Color.RED; // Буфер полон
-        } else if (isBufferEmpty) {
-            bufferColor = Color.GREEN; // Буфер пуст
-        } else {
-            bufferColor = Color.YELLOW; // Буфер частично заполнен
-        }
+        Color bufferColor = Color.YELLOW;
 
-        // Создаем прямоугольник
-        Rectangle rectangle = new Rectangle(100, 50);
+        Rectangle rectangle = new Rectangle(300, 50);
         rectangle.setFill(bufferColor);
 
         // Создаем текст для отображения размера буфера
-        Text text = new Text(String.valueOf(bufferSize));
-        text.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        text.setFill(Color.BLACK);
+        Text bufferSizeText = new Text("Prev Buffer Size: " + bufferSize);
+        bufferSizeText.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        bufferSizeText.setFill(Color.BLACK);
 
-        // Группируем прямоугольник и текст в StackPane
+        // Создание контейнера для ID заявок и источников в буфере
+        VBox requestsContainer = new VBox(2); // Вертикальный бокс с отступом 2
+        for (Request request : requests) {
+            // ID источника
+            Text sourceIdText = new Text("Source: " + request.getSourceId());
+            sourceIdText.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+            sourceIdText.setFill(Color.BLUE);
+
+            // ID заявки
+            Text requestIdText = new Text("Request: " + request.getRequestId());
+            requestIdText.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            requestIdText.setFill(Color.BLACK);
+
+            // Добавление источника и заявки в контейнер
+            VBox requestInfo = new VBox(sourceIdText, requestIdText);
+            requestsContainer.getChildren().add(requestInfo);
+        }
+
         StackPane stackPane = new StackPane();
-        stackPane.getChildren().addAll(rectangle, text);
+        stackPane.getChildren().addAll(rectangle, requestsContainer, bufferSizeText);
 
         return stackPane;
     }
-
 }
 
 

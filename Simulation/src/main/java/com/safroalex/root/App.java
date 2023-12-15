@@ -13,7 +13,7 @@ public class App {
 
     public static void main(String[] args) {
         int totalSources = 5;     // Количество источников
-        int totalDevices = 3;     // Количество приборов
+        int totalDevices = 4;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
         int totalSteps = 100;       // Количество шагов моделирования

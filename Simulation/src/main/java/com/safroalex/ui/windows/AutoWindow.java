@@ -50,11 +50,25 @@ public class AutoWindow extends Application {
         TableColumn<SourceData, Number> denialProbabilityCol = new TableColumn<>("Вероятность отказа");
         denialProbabilityCol.setCellValueFactory(new PropertyValueFactory<>("denialProbability"));
 
+        TableColumn<SourceData, Double> avgStayTimeCol = new TableColumn<>("Ср. время преб.");
+        avgStayTimeCol.setCellValueFactory(new PropertyValueFactory<>("avgStayTime"));
+
+        TableColumn<SourceData, Double> avgWaitTimeCol = new TableColumn<>("Ср. время ожид.");
+        avgWaitTimeCol.setCellValueFactory(new PropertyValueFactory<>("totalWaitTimeBySource"));
+
         TableColumn<SourceData, Double> avgServiceTimeCol = new TableColumn<>("Ср. время обсл.");
         avgServiceTimeCol.setCellValueFactory(new PropertyValueFactory<>("totalServiceTimeBySource"));
 
+        TableColumn<SourceData, Double> varianceBufferTimeCol = new TableColumn<>("Дисп. TБП");
+        varianceBufferTimeCol.setCellValueFactory(new PropertyValueFactory<>("varianceBufferTime"));
+
+        TableColumn<SourceData, Double> varianceServiceTimeCol = new TableColumn<>("Дисп. Tобсл.");
+        varianceServiceTimeCol.setCellValueFactory(new PropertyValueFactory<>("varianceServiceTime"));
+
+
         // Добавляем столбцы в таблицу
-        table.getColumns().addAll(sourceNumberCol, requestCountCol, denialProbabilityCol, avgServiceTimeCol);
+        table.getColumns().addAll(sourceNumberCol, requestCountCol, denialProbabilityCol,
+                avgStayTimeCol, avgWaitTimeCol, avgServiceTimeCol, varianceBufferTimeCol, varianceServiceTimeCol);
 
         // Создание и установка данных для таблицы
         ObservableList<SourceData> sourceData = SourceData.createSourceDataList(totalSources, statistics);
@@ -73,7 +87,7 @@ public class AutoWindow extends Application {
 
         deviceTable.getColumns().addAll(deviceNumberCol, utilizationCol);
         
-        ObservableList<DeviceData> deviceData = DeviceData.createDeviceDataList(totalDevices, statistics);
+        ObservableList<DeviceData> deviceData = DeviceData.createDeviceDataList(totalDevices, statistics, totalSteps);
         deviceTable.setItems(deviceData);
 
         // Располагаем обе таблицы в VBox
@@ -94,19 +108,14 @@ public class AutoWindow extends Application {
 //
 
 //
-//        TableColumn<SourceData, Double> avgStayTimeCol = new TableColumn<>("Ср. время преб.");
-//        avgStayTimeCol.setCellValueFactory(new PropertyValueFactory<>("avgStayTime"));
+
 //
 //        TableColumn<SourceData, Double> avgBufferTimeCol = new TableColumn<>("Ср. время в БП");
 //        avgBufferTimeCol.setCellValueFactory(new PropertyValueFactory<>("avgBufferTime"));
 //
 
 //
-//        TableColumn<SourceData, Double> varianceServiceTimeCol = new TableColumn<>("Дисп. Tобсл.");
-//        varianceServiceTimeCol.setCellValueFactory(new PropertyValueFactory<>("varianceServiceTime"));
-//
-//        TableColumn<SourceData, Double> varianceBufferTimeCol = new TableColumn<>("Дисп. TБП");
-//        varianceBufferTimeCol.setCellValueFactory(new PropertyValueFactory<>("varianceBufferTime"));
+
 
 
 

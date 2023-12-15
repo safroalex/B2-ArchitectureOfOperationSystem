@@ -1,6 +1,7 @@
 package com.safroalex.logic;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Buffer {
     private final int capacity; // Максимальная вместимость буфера
@@ -43,6 +44,10 @@ public class Buffer {
         requests.addLast(newRequest);
     }
 
+    public LinkedList<Request> getRequests() {
+        return requests;
+    }
+
     // Получение заявки из буфера. Вернет null, если буфер пуст.
     public Request getRequest() {
         if (requests.isEmpty()) {
@@ -71,4 +76,5 @@ public class Buffer {
     public boolean isFull() {
         return requests.size() == capacity;
     }
+
 }

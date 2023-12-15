@@ -6,8 +6,10 @@ public class Request {
     private final double creationTime;
     private double completionTime;
     private double entryTime; // Время поступления заявки в буфер
+    private double waitTime;
+    private double creationTimeForTable;
 
-    public Request(int sourceId, int requestId, double creationTime) {
+    public Request(int sourceId, int requestId, double creationTime, double creationTimeForTable) {
         this.sourceId = sourceId;
         this.requestId = requestId;
         this.creationTime = creationTime;
@@ -22,12 +24,18 @@ public class Request {
         this.entryTime = time;
     }
 
-    public void setCompletionTime(double completionTime) {  // И этот метод
+    public void setCompletionTime(double completionTime) {
         this.completionTime = completionTime;
     }
 
+    public void setWaitTime(double waitTime) {
+        this.waitTime = waitTime;
+    }
     public double getEntryTime() {
         return entryTime;
+    }
+    public double getWaitTime() {
+        return waitTime;
     }
 
     public double getCompletionTime() {
@@ -43,6 +51,9 @@ public class Request {
     }
 
     public double getCreationTime() {
+        return creationTime;
+    }
+    public double getCreationTimeForTable() {
         return creationTime;
     }
 }

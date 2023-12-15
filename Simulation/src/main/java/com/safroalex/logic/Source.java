@@ -29,10 +29,11 @@ public class Source {
     }
 
     // Генерирует следующую заявку
-    public Request generateRequest() {
+    public Request generateRequest(double currentModelTime) {
         totalGeneratedRequests++;
         double creationTime = getNextCreationTime();
-        Request newRequest = new Request(sourceId, totalGeneratedRequests, creationTime);
+        double creationTimeForTable = currentModelTime + creationTime % 10;
+        Request newRequest = new Request(sourceId, totalGeneratedRequests, creationTime, creationTimeForTable);
         requests.add(newRequest);  // Добавляем заявку в лист
         statistics.addRequestGenerated(newRequest.getSourceId());
         return newRequest;

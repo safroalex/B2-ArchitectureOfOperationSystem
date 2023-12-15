@@ -11,7 +11,8 @@ public class SystemSimulation {
     private double currentModelTime;
     private final Statistics statistics;
 
-    public SystemSimulation(Statistics statistics, int totalSources, int totalDevices, double minInterval, double maxInterval, int bufferCapacity) {
+    public SystemSimulation(Statistics statistics, int totalSources, int totalDevices,
+                            double minInterval, double maxInterval, int bufferCapacity) {
         this.sources = new ArrayList<>();
         this.devices = new ArrayList<>();
         this.buffer = new Buffer(statistics ,bufferCapacity);
@@ -58,7 +59,7 @@ public class SystemSimulation {
         }
 
         for (Source source : sources) {
-            Request request = source.generateRequest();
+            Request request = source.generateRequest(currentModelTime);
             if (request != null) {
                 System.out.println("zayavka-sgenerirovana: " + request);
                 processRequest(request);
@@ -75,6 +76,8 @@ public class SystemSimulation {
             //statistics.addServiceTimeSquared(request.getSourceId(), Math.pow(serviceTime, 2));
 
             freeDevice.takeRequest(request, currentModelTime);
+            request.setWaitTime(currentModelTime - request.getCreationTimeForTable());
+            statistics.addWaitTime(request.getSourceId(), request.getWaitTime());
             System.out.println("zayavka-obrabotyvaetsya-priborom: " + freeDevice);
         } else {
             // Если все приборы заняты, попытка добавить заявку в буфер.
@@ -98,6 +101,11 @@ public class SystemSimulation {
         statistics.setRequestsBufferSize(buffer.getRequestsCount());
         statistics.setBufferIsEmpty(buffer.isEmpty());
         statistics.setBufferIsFull(buffer.isFull());
+        statistics.setListOfRequestOfBuffer(buffer.getRequests());
+        statistics.setListOfDevices(devices);
+        for (Device device : devices) {
+        statistics.setDeviceUsageTime(device.getDeviceId(), device.getTotalTimeWorked());
+        }
 
         StringBuilder status = new StringBuilder();
 
