@@ -16,7 +16,7 @@ public class App {
         int totalDevices = 4;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
-        int totalSteps = 100;       // Количество шагов моделирования
+        int totalSteps = 1000;       // Количество шагов моделирования
         int bufferCapacity = 5;   // Вместимость буффера
 
         Statistics mainStatistic = new Statistics();
