@@ -3,12 +3,12 @@ package com.safroalex.logic;
 public class TestSimulation {
     public static void main(String[] args) {
         // Параметры
-        int totalSources = 5;     // Количество источников
-        int totalDevices = 3;     // Количество приборов
+        int totalSources = 4;     // Количество источников
+        int totalDevices = 4;     // Количество приборов
         double minInterval = 1.5; // Минимальный интервал между заявками
         double maxInterval = 2;   // Максимальный интервал между заявками
-        int totalSteps = 100;       // Количество шагов моделирования
-        int bufferCapacity = 5;   // Вместимость буффера
+        int totalSteps = 1000;       // Количество шагов моделирования
+        int bufferCapacity = 500;   // Вместимость буффера
 
         Statistics statistic = new Statistics();
 
@@ -29,6 +29,5 @@ public class TestSimulation {
         System.out.println(RejectionHandler.getRejectedRequests());
 
         System.out.println(simulation.getStatistics());
-        System.out.println(statistic.getTotalServiceTimeBySource(3));
     }
 }

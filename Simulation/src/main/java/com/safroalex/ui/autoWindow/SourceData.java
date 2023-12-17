@@ -33,8 +33,8 @@ public class SourceData {
         for (int i = 0; i < totalSources; i++) {
             double denialProbability = statistics.getRatioOfDenials(i);
             int requestCount = statistics.getTotalRequestsGeneratedBySource(i);
-            double totalServiceTimeBySource = statistics.getTotalServiceTimeBySource(i);
-            double totalWaitTimeBySource = statistics.getTotalWaitTimeBySource(i);
+            double totalServiceTimeBySource = statistics.getAverageServiceTimeBySource(i);
+            double totalWaitTimeBySource = statistics.getAverageWaitTimeBySource(i);
             double avgStayTime = totalServiceTimeBySource + totalWaitTimeBySource;
             double varianceBufferTime = statistics.getWaitTimeVariance(i);
             double varianceServiceTime = statistics.getServiceTimeVariance(i);

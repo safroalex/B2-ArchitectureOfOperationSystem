@@ -52,14 +52,19 @@ public class Source {
     }
 
     public double getAverageServiceTime() {
-        double sum = 0;
+        double sumServiceTime = 0;
+        int processedRequestsCount = 0;
+
         for (Request request : requests) {
-            if (request.getCompletionTime() > 0) {
-                sum += request.getCompletionTime() - request.getCreationTime();
+            if (request.getCompletionTime() > 0) { // Проверяем, была ли заявка обработана
+                sumServiceTime += request.getCompletionTime() - request.getCreationTime();
+                processedRequestsCount++; // Учитываем только обработанные заявки
             }
         }
-        return sum / totalGeneratedRequests;
+
+        return processedRequestsCount > 0 ? sumServiceTime / processedRequestsCount : 0;
     }
+
 
     // Метод для информирования источника о завершении обработки заявки
     public void informRequestCompletion(Request request, double completionTime) {

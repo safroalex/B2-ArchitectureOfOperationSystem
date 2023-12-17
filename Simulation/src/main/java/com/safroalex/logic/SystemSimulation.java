@@ -5,11 +5,12 @@ import java.util.List;
 
 public class SystemSimulation {
 
-    private List<Source> sources;
-    private List<Device> devices;
-    private Buffer buffer;
+    private final List<Source> sources;
+    private final List<Device> devices;
+    private final Buffer buffer;
     private double currentModelTime;
     private final Statistics statistics;
+    private int lastUsedDeviceIndex = -1;
 
     public SystemSimulation(Statistics statistics, int totalSources, int totalDevices,
                             double minInterval, double maxInterval, int bufferCapacity) {
@@ -33,8 +34,13 @@ public class SystemSimulation {
     }
 
     private Device findFreeDevice() {
-        for (Device device : devices) {
+        int devicesCount = devices.size();
+        int startIndex = (lastUsedDeviceIndex + 1) % devicesCount;
+        for (int i = 0; i < devicesCount; i++) {
+            int currentIndex = (startIndex + i) % devicesCount;
+            Device device = devices.get(currentIndex);
             if (!device.isBusy()) {
+                lastUsedDeviceIndex = currentIndex; // Обновление индекса последнего использованного прибора
                 return device;
             }
         }
@@ -43,14 +49,13 @@ public class SystemSimulation {
 
     public void step() {
         currentModelTime += 1;
-        //System.out.println("Текущее время модели: " + currentModelTime);
 
         for (Device device : devices) {
             if (device.isBusy() && currentModelTime >= device.getTimeWhenWillBeFree()) {
                 device.finishProcessing(currentModelTime, sources);
 
                 // Обработка заявок из буфера, если прибор свободен и в буфере есть заявки.
-                Request bufferedRequest = buffer.getRequest();
+                Request bufferedRequest = buffer.getRequest(currentModelTime);
                 if (bufferedRequest != null) {
                     device.takeRequest(bufferedRequest, currentModelTime);
                     System.out.println("zayavka-iz-bufera-obrabotana-priborom: " + device);
@@ -72,8 +77,6 @@ public class SystemSimulation {
         if (freeDevice != null) {
             // считаем статистику для времени обслуживания
             double serviceTime = freeDevice.getServiceTimeForRequest(request);
-            //statistics.addServiceTime(request.getSourceId(), serviceTime);
-            //statistics.addServiceTimeSquared(request.getSourceId(), Math.pow(serviceTime, 2));
 
             freeDevice.takeRequest(request, currentModelTime);
             request.setWaitTime(currentModelTime - request.getCreationTimeForTable());
@@ -86,8 +89,6 @@ public class SystemSimulation {
                 // если заявка все еще в буфере, считаем статистику для времени ожидания
                 if (buffer.requests.contains(request)) { // проверяем, что заявка все еще в буфере
                     double waitTime = buffer.getWaitTimeForRequest(request, currentModelTime);
-                   // statistics.addWaitTime(request.getSourceId(), waitTime);
-                    //statistics.addWaitTimeSquared(request.getSourceId(), Math.pow(waitTime, 2));
                 }
 
                 System.out.println("zayavka-dobavlena-v-bufer: " + request);
@@ -114,6 +115,7 @@ public class SystemSimulation {
         status.append("SOURCES:\n");
         for (Source source : sources) {
             statistics.addServiceTime(source.getSourceId() ,source.getAverageServiceTime());
+
             status.append(source.toString()).append("\n");
         }
 
@@ -124,6 +126,7 @@ public class SystemSimulation {
 
         status.append("BUFFER:\n");
         status.append(buffer.toString());
+
 
         return status.toString();
     }

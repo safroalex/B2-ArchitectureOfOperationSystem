@@ -36,7 +36,7 @@ public class AutoWindow extends Application {
         System.out.println(statistics.toString());
         System.out.println(simulation.getAndSetStatus());
         System.out.println(simulation.getStatistics());
-        System.out.println(statistics.getTotalServiceTimeBySource(3));
+        System.out.println(statistics.getAverageServiceTimeBySource(3));
 
 
         TableView<SourceData> table = new TableView<>();

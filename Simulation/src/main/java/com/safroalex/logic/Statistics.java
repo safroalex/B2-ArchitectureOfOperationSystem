@@ -3,7 +3,7 @@ package com.safroalex.logic;
 import java.util.*;
 
 public class Statistics {
-    private final Random random = new Random();
+    //private final Random random = new Random();
     protected List<Device> devices = new LinkedList<>();
     protected LinkedList<Request> requestsOfBuffer = new LinkedList<>(); // Список заявок в буфере
     private Map<Integer, Integer> requestsGeneratedBySource = new HashMap<>(); // источник -> количество заявок
@@ -49,7 +49,7 @@ public class Statistics {
             sb.append("Source ").append(entry.getKey()).append(": ").append(String.format("%.2f", entry.getValue())).append("\n");
         }
 
-        sb.append("Total service time by source:\n");
+        sb.append("Average service time by source:\n");
         for (Map.Entry<Integer, Double> entry : totalServiceTimeBySource.entrySet()) {
             sb.append("Source ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
@@ -79,11 +79,12 @@ public class Statistics {
     }
 
     public void addWaitTime(int sourceId, double waitTime) {
-        totalWaitTimeBySource.put(sourceId, totalWaitTimeBySource.getOrDefault(sourceId, 1.5) + waitTime);
+        totalWaitTimeBySource.put(sourceId, totalWaitTimeBySource.getOrDefault(sourceId, 0.0) + waitTime);
 
         double squaredTime = waitTime * waitTime;
         totalWaitTimeSquaredBySource.put(sourceId, totalWaitTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
     }
+
 
     public void addServiceTime(int sourceId, double serviceTime) {
         totalServiceTimeBySource.put(sourceId, totalServiceTimeBySource.getOrDefault(sourceId, 0.0) + serviceTime);
@@ -107,9 +108,11 @@ public class Statistics {
     public void setRequestsBufferSize(int size) {
         this.requestsBufferSize = size;
     }
+
     public void setBufferIsEmpty(boolean status) {
         this.statusBufferIsEmpty = status;
     }
+
     public void addServiceTimeSquared(int sourceId, double serviceTime) {
         double squaredTime = serviceTime * serviceTime;
         totalServiceTimeSquaredBySource.put(sourceId, totalServiceTimeSquaredBySource.getOrDefault(sourceId, 0.0) + squaredTime);
@@ -133,47 +136,43 @@ public class Statistics {
         return ratioOfDenials.getOrDefault(sourceID, 0.0);
     }
 
-    public double getTotalServiceTimeBySource(int sourceID) {
-        return totalServiceTimeBySource.getOrDefault(sourceID, 0.0);
+    public double getAverageServiceTimeBySource(int sourceID) {
+        return totalServiceTimeBySource.getOrDefault(sourceID, 0.0) / 1000;
+    }
+    //random.nextDouble(0, 1)
+    public double getAverageWaitTimeBySource(int sourceId) {
+        return ((totalWaitTimeBySource.getOrDefault(sourceId, 0.0))
+                / (getTotalRequestsGeneratedBySource(sourceId
+        ) - getRequestsDeniedBySource(sourceId))) / 1000;
     }
 
-    public double getTotalWaitTimeBySource(int sourceId) {
-        return totalWaitTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1));
-    }
-
-    public double getDenialProbability(int sourceId) {
-        return (double) requestsDeniedBySource.getOrDefault(sourceId, 0) / requestsGeneratedBySource.getOrDefault(sourceId, 1);
-    }
-
-    public double getAverageTimeInSystem(int sourceId) {
-        int totalRequests = requestsGeneratedBySource.getOrDefault(sourceId, 1);
-        return (totalServiceTimeBySource.getOrDefault(sourceId, 0.0) + totalWaitTimeBySource.getOrDefault(sourceId, 0.0)) / totalRequests;
-    }
-
+     //random.nextDouble(0, 1)
     public double getServiceTimeVariance(int sourceId) {
         int totalRequests = requestsGeneratedBySource.getOrDefault(sourceId, 1);
-        double avgServiceTime = totalServiceTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
-        double avgServiceTimeSquared = totalServiceTimeSquaredBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
-        return avgServiceTimeSquared - avgServiceTime * avgServiceTime;
+        double avgServiceTime = totalServiceTimeBySource.getOrDefault(sourceId,0.0) / totalRequests;
+        double avgServiceTimeSquared = totalServiceTimeSquaredBySource.getOrDefault(sourceId,0.0) / totalRequests;
+        return (avgServiceTimeSquared - avgServiceTime * avgServiceTime) / 1000;
     }
-
+    //random.nextDouble(0, 1)
     public double getWaitTimeVariance(int sourceId) {
         int totalRequests = requestsGeneratedBySource.getOrDefault(sourceId, 1);
-        double avgWaitTime = totalWaitTimeBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
-        double avgWaitTimeSquared = totalWaitTimeSquaredBySource.getOrDefault(sourceId, random.nextDouble(0, 1)) / totalRequests;
-        return avgWaitTimeSquared - avgWaitTime * avgWaitTime;
+        double avgWaitTime = getAverageWaitTimeBySource(sourceId);
+        double avgWaitTimeSquared = totalWaitTimeSquaredBySource.getOrDefault(sourceId, 0.0) / totalRequests;
+        return (avgWaitTimeSquared - avgWaitTime * avgWaitTime) / 1000000 ;
     }
 
     public double getDeviceUtilizationCoefficient(int deviceId, double totalSimulationTime) {
-        return deviceUsageTime.getOrDefault(deviceId, 0.0) / totalSimulationTime;
+        return (deviceUsageTime.getOrDefault(deviceId, 0.0) / totalSimulationTime) / 1000;
     }
 
     public LinkedList<Request> getRequestsOfBuffer() {
         return requestsOfBuffer;
     }
+
     public List<Device> getDevicesList() {
         return devices;
     }
+
     public int getRequestsBufferSize() {
         return requestsBufferSize;
     }

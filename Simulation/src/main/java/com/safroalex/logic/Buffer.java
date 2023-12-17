@@ -49,12 +49,34 @@ public class Buffer {
     }
 
     // Получение заявки из буфера. Вернет null, если буфер пуст.
-    public Request getRequest() {
+    public Request getRequest(double currentModelTime) {
         if (requests.isEmpty()) {
             return null;
-        } else {
-            return requests.removeFirst();
         }
+
+        Request highestPriorityRequest = null;
+        int highestPriority = Integer.MIN_VALUE;
+
+        // Поиск заявки с наивысшим приоритетом
+        for (Request request : requests) {
+            int priority = request.getSourceId(); // предполагаем, что приоритет определяется идентификатором источника
+            if (priority > highestPriority) {
+                highestPriority = priority;
+                highestPriorityRequest = request;
+            }
+        }
+
+        // Если найдены заявки с одинаковым наивысшим приоритетом, выбираем последнюю поступившую
+        if (highestPriorityRequest != null) {
+            requests.remove(highestPriorityRequest);
+
+            // Рассчитываем время ожидания заявки в буфере и добавляем его в статистику
+            double entryTime = highestPriorityRequest.getEntryTime();
+            double waitTime = currentModelTime - entryTime;
+            statistics.addWaitTime(highestPriorityRequest.getSourceId(), waitTime);
+        }
+
+        return highestPriorityRequest;
     }
 
     public double getWaitTimeForRequest(Request request, double currentTime) {
